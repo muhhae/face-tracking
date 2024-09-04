@@ -46,7 +46,7 @@ with vision.FaceDetector.create_from_options(options) as detector:
                 frame,
                 (b.origin_x, b.origin_y),
                 (b.origin_x + b.width, b.origin_y + b.height),
-                color=(255, 0, 0),
+                color=(0, 255, 255),
                 thickness=2,
             )
 
