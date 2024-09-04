@@ -4,21 +4,13 @@ import time
 import mediapipe as mp
 from mediapipe.tasks.python import vision
 
-
 model_path = "./model/blaze_face_short_range.tflite"
-
-base_options = mp.tasks.BaseOptions
-face_detector = mp.tasks.vision.FaceDetector
-face_detector_options = mp.tasks.vision.FaceDetectorOptions
-vision_running_mode = mp.tasks.vision.RunningMode
-
-
-options = face_detector_options(
-    base_options=base_options(model_asset_path=model_path),
-    running_mode=vision_running_mode.IMAGE,
+options = vision.FaceDetectorOptions(
+    base_options=mp.tasks.BaseOptions(model_asset_path=model_path),
+    running_mode=vision.RunningMode.IMAGE,
 )
 
-with face_detector.create_from_options(options) as detector:
+with vision.FaceDetector.create_from_options(options) as detector:
     vid = cv2.VideoCapture(0)
 
     start_time = time.time()

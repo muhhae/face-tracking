@@ -5,32 +5,19 @@ import mediapipe as mp
 from mediapipe.tasks.python import vision
 
 
-model_path = "./model/blaze_face_short_range.tflite"
-
-base_options = mp.tasks.BaseOptions
-face_detector = mp.tasks.vision.FaceDetector
-face_detector_options = mp.tasks.vision.FaceDetectorOptions
-vision_running_mode = mp.tasks.vision.RunningMode
-
-
 def detector_callback(result: vision.FaceDetectorResult, image: mp.Image, n):
-    # print("result", result.detections)
-    # print("image", image)
-    # print("n", n)
-    print("--------START--------")
     for e in result.detections:
         print("bounding: ", e.bounding_box)
-        # print("\n", e, "\n")
-    print("--------END--------")
 
 
-options = face_detector_options(
-    base_options=base_options(model_asset_path=model_path),
-    running_mode=vision_running_mode.LIVE_STREAM,
+model_path = "./model/blaze_face_short_range.tflite"
+options = vision.FaceDetectorOptions(
+    base_options=mp.tasks.BaseOptions(model_asset_path=model_path),
+    running_mode=vision.RunningMode.LIVE_STREAM,
     result_callback=detector_callback,
 )
 
-with face_detector.create_from_options(options) as detector:
+with vision.FaceDetector.create_from_options(options) as detector:
     vid = cv2.VideoCapture(0)
 
     start_time = time.time()
