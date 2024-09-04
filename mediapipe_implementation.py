@@ -4,10 +4,19 @@ import time
 import mediapipe as mp
 from mediapipe.tasks.python import vision
 
+last_timestamp = 0
+current_bounding_boxes = []
 
-def detector_callback(result: vision.FaceDetectorResult, image: mp.Image, n):
-    for e in result.detections:
-        print("bounding: ", e.bounding_box)
+
+def detector_callback(
+    result: vision.FaceDetectorResult, image: mp.Image, timestamp: int
+):
+    global last_timestamp, current_bounding_boxes
+    if last_timestamp > timestamp:
+        print("Last timestamp is greater than current timestamp")
+        return
+    last_timestamp = timestamp
+    current_bounding_boxes = [f.bounding_box for f in result.detections]
 
 
 model_path = "./model/blaze_face_short_range.tflite"
@@ -18,10 +27,9 @@ options = vision.FaceDetectorOptions(
 )
 
 with vision.FaceDetector.create_from_options(options) as detector:
-    vid = cv2.VideoCapture(0)
-
     start_time = time.time()
     frame_counter = 0
+    vid = cv2.VideoCapture(0)
 
     while 1:
         frame_counter += 1
@@ -43,10 +51,20 @@ with vision.FaceDetector.create_from_options(options) as detector:
             2,
             cv2.LINE_AA,
         )
-        cv2.imshow("win", frame)
 
         mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_frame)
         detector.detect_async(mp_image, int(time.time() * 1000))
+
+        for b in current_bounding_boxes:
+            cv2.rectangle(
+                frame,
+                (b.origin_x, b.origin_y),
+                (b.origin_x + b.width, b.origin_y + b.height),
+                color=(0, 255, 255),
+                thickness=2,
+            )
+
+        cv2.imshow("win", frame)
 
         if cv2.waitKey(1) & 0xFF == ord("q"):
             break
